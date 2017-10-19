@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.0
+* add fd hook to prevent fd-admin removal from fd
+
 ## 0.3.0
 * Retry replication forever on error
 
