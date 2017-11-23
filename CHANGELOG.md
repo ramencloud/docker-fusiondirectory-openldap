@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.0
+* add possibility of creating initial groups via LDAP_INI_GROUP_N variables
+
 ## 0.4.0
 * add fd hook to prevent fd-admin removal from fd
 

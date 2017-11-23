@@ -322,6 +322,24 @@ olcOverlay: syncprov
 olcSpSessionLog: 300
 EOF
 
+#is subject to replication, only one container should have LDAP_INI_GROUP_N configured
+lig_cnt=1
+lig_name="LDAP_INI_GROUP_${lig_cnt}"
+while [ -n "${!lig_name}" ]; do
+ read g d <<< "${!lig_name}"
+ lig_cnt=$[ lig_cnt + 1 ]
+ lig_name="LDAP_INI_GROUP_${lig_cnt}"
+ ldapadd -c -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" << EOF
+dn: cn=${g},ou=groups,${SUFFIX}
+objectClass: groupOfNames
+objectClass: gosaGroupOfNames
+cn: ${g}
+description: ${d:-describe me please}
+gosaGroupObjects: [U]
+member: ${UID_FD_ADMIN}
+EOF
+done
+
 #load user data if available (/container/service/slapd/assets/config/bootstrap/ldif/custom is not working well 4 me)
 #may fail due to replication -> fail; user should configure only one replica with this initial data
 if [ -d /var/ldap-init-data ]; then
