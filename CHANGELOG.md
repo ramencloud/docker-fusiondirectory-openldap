@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0
+* bump osixia/openldap to 1.1.10
+* support for space in passwords
+
 ## 0.5.0
 * add possibility of creating initial groups via LDAP_INI_GROUP_N variables
 

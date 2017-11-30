@@ -43,7 +43,7 @@ changetype: delete
 
 EOF
 
-ldapmodify -x -D "cn=admin,${SUFFIX}" -w ${LDAP_ADMIN_PASSWORD} -f /tmp/delete.ldif
+ldapmodify -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/delete.ldif
 fusiondirectory-insert-schema
 
 cat <<EOF > /tmp/base.ldif
@@ -80,7 +80,7 @@ userPassword: ${LDAP_READONLY_USER_PASSWORD}
 EOF
 fi
 
-ldapadd -x -D "cn=admin,${SUFFIX}" -w ${LDAP_ADMIN_PASSWORD} -f /tmp/base.ldif
+ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/base.ldif
 
 cat <<EOF > /tmp/add.ldif
 dn: ou=aclroles,${SUFFIX}
@@ -236,7 +236,7 @@ mv /etc/ldap/schema/fusiondirectory/rfc2307bis.schema \
    /etc/ldap/schema/fusiondirectory/modify/
 fusiondirectory-insert-schema -i /etc/ldap/schema/fusiondirectory/*.schema
 fusiondirectory-insert-schema -m /etc/ldap/schema/fusiondirectory/modify/*.schema
-ldapadd -x -D "cn=admin,${SUFFIX}" -w ${LDAP_ADMIN_PASSWORD} -f /tmp/add.ldif
+ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/add.ldif
 
 #add configuration for groupOfNames, was only for groupOfUniqueNames only
 #https://technicalnotes.wordpress.com/2014/04/19/openldap-setup-with-memberof-overlay/
