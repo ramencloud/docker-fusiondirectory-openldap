@@ -11,10 +11,15 @@ if [ -d ${SINGLEDIR} ]; then
  ln -s ${SINGLEDIR}/data /var/lib/ldap
 fi
 
-#if previous start was not complete (or never was) wipe so we can start fresh
+# If previous start was not complete (or never was), wipe all LDAP configuration so we can start fresh.
+# It can be judged by checking the existence of the file `FIRST_START_DONE` and `IS_IN_UPGRADE`.
+# Only when both files don't exist, we can start fresh.
+# In the upgrade scenario (when the file `IS_IN_UPGRADE` exists), don't wipe files
+# even if the file `FIRST_START_DONE` doesn't exist.
 FIRST_START_DONE=/etc/ldap/slapd.d/slapd-first-start-done
+IS_IN_UPGRADE=/etc/ldap/slapd.d/is-in-upgrade
 mkdir -p /etc/ldap/slapd.d /var/lib/ldap
-if [ ! -e "${FIRST_START_DONE}" ]; then
+if [ ! -e "${FIRST_START_DONE}" -a ! -e "${IS_IN_UPGRADE}" ]; then
  find /etc/ldap/slapd.d -mindepth 1 -delete
  find /var/lib/ldap -mindepth 1 -delete
 fi

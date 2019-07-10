@@ -269,59 +269,6 @@ olcOverlay: auditlog
 olcAuditlogFile: ${LDAP_AUDIT_FILE}
 EOF
 
-#set up replication
-[ -n "${LDAP_SERVERID}" -a -n "${LDAP_REPLICATION_URI1}" -a -n "${LDAP_REPLICATION_URI2}" ] && ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
-dn: cn=config
-changetype: modify
-add: olcServerID
-olcServerID: ${LDAP_SERVERID}
-
-dn: cn=module{0},cn=config
-changetype: modify
-add: olcModuleLoad
-olcModuleLoad: syncprov.la
-
-dn: olcDatabase={1}hdb,cn=config
-changetype: modify
-add: olcSyncRepl
-olcSyncRepl: rid=001
-  provider=${LDAP_REPLICATION_URI1}
-  bindmethod=simple
-  binddn="cn=admin,${SUFFIX}"
-  credentials="${LDAP_ADMIN_PASSWORD}"
-  searchbase="${SUFFIX}"
-  scope=sub
-  schemachecking=on
-  type=refreshOnly
-  retry="2 5 3 10 5 +"
-  interval=00:00:00:05
-  timeout=3
-  keepalive=60:5:60
-olcSyncRepl: rid=002
-  provider=${LDAP_REPLICATION_URI2}
-  bindmethod=simple
-  binddn="cn=admin,${SUFFIX}"
-  credentials="${LDAP_ADMIN_PASSWORD}"
-  searchbase="${SUFFIX}"
-  scope=sub
-  schemachecking=on
-  type=refreshOnly
-  retry="2 5 3 10 5 +"
-  interval=00:00:00:05
-  timeout=3
-  keepalive=60:5:60
--
-add: olcMirrorMode
-olcMirrorMode: TRUE
-
-dn: olcOverlay=syncprov,olcDatabase={1}hdb,cn=config
-changetype: add
-objectClass: olcOverlayConfig
-objectClass: olcSyncProvConfig
-olcOverlay: syncprov
-olcSpSessionLog: 300
-EOF
-
 #is subject to replication, only one container should have LDAP_INI_GROUP_N configured
 lig_cnt=1
 lig_name="LDAP_INI_GROUP_${lig_cnt}"
