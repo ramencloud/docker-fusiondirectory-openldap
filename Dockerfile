@@ -25,5 +25,6 @@ COPY init.dirs /sbin/init.dirs
 RUN chmod 755 /sbin/init.sh /sbin/init.dirs /container/service/slapd/startup.sh
 RUN sed -i "/^FIRST_START_DONE=/aFIRST_START_DONE=/etc/ldap/slapd.d/slapd-first-start-done" /container/service/slapd/startup.sh
 RUN sed -i "/# create dir if they not already exists/i/sbin/init.dirs\n" /container/service/slapd/startup.sh
-RUN sed -i "/# stop OpenLDAP/c\    /sbin/init.sh\n" /container/service/slapd/startup.sh
+# init.sh should be executed before replication starts, since init.sh assumes it is executed before that.
+RUN sed -i "/# Replication config/c\    /sbin/init.sh\n" /container/service/slapd/startup.sh
 RUN sed -i "s|exec /usr/sbin/slapd \(.*\)|exec /usr/sbin/slapd \1 \${LDAP_REPLICATION_COOKIE:+-c \$LDAP_REPLICATION_COOKIE}|" /container/service/slapd/process.sh
