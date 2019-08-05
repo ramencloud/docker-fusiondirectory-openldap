@@ -43,9 +43,7 @@ changetype: delete
 
 EOF
 
-if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
-    ldapmodify -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/delete.ldif
-fi
+ldapmodify -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/delete.ldif
 
 fusiondirectory-insert-schema
 
