@@ -44,6 +44,7 @@ changetype: delete
 EOF
 
 ldapmodify -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/delete.ldif
+
 fusiondirectory-insert-schema
 
 cat <<EOF > /tmp/base.ldif
@@ -80,7 +81,9 @@ userPassword: ${LDAP_READONLY_USER_PASSWORD}
 EOF
 fi
 
-ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/base.ldif
+if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+    ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/base.ldif
+fi
 
 cat <<EOF > /tmp/add.ldif
 dn: ou=aclroles,${SUFFIX}
@@ -236,7 +239,10 @@ mv /etc/ldap/schema/fusiondirectory/rfc2307bis.schema \
    /etc/ldap/schema/fusiondirectory/modify/
 fusiondirectory-insert-schema -i /etc/ldap/schema/fusiondirectory/*.schema
 fusiondirectory-insert-schema -m /etc/ldap/schema/fusiondirectory/modify/*.schema
-ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/add.ldif
+
+if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+    ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/add.ldif
+fi
 
 #add configuration for groupOfNames, was only for groupOfUniqueNames only
 #https://technicalnotes.wordpress.com/2014/04/19/openldap-setup-with-memberof-overlay/
@@ -291,7 +297,9 @@ done
 #may fail due to replication -> fail; user should configure only one replica with this initial data
 if [ -d /var/ldap-init-data ]; then
     for f in /var/ldap-init-data/*.ldif; do
-        ldapadd -c -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f "$f"
+        if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+            ldapadd -c -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f "$f"
+        fi
     done
 fi
 
