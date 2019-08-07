@@ -1,6 +1,31 @@
 #!/bin/bash
 set -e
 
+FIRST_START_DONE=/etc/ldap/slapd.d/slapd-first-start-done
+IS_IN_UPGRADE=/etc/ldap/slapd.d/is-in-upgrade
+if [ ! -e "${FIRST_START_DONE}" -a -e "${IS_IN_UPGRADE}" ]; then
+    #Clean up replication config when upgrading from the previous version (0.6.0) to the current version.
+    #This clean up is needed to fill the gap between the previous version and the current.
+    #Please see SA-19875 for more details.
+    #This modification can be removed in the next version, since it is needed only when upgrading from
+    #the previous version.
+    cat <<EOF > /tmp/replication-disable.ldif
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+delete: olcSyncRepl
+-
+delete: olcMirrorMode
+EOF
+
+    #Since this modification works only for upgrading from the previous version (0.6.0), the `ldapmodify`
+    #command doesn't work (exit status is not 0) in other cases.
+    #In order to continue the following procedures even when `ldapmodify` fails, execute `true` to
+    #ensure that the resulting compound command always exits with status 0.
+    ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/replication-disable.ldif || true
+
+    rm -rf /tmp/*
+fi
+
 BOOTSTRAPPED=/etc/ldap/slapd.d/bootstrapped
 if [ -e ${BOOTSTRAPPED} ]; then
     exit 0
