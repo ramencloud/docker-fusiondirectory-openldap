@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+readonly LEADER_NODE=${LEADER_NODE:-0}
+
 IFS='.' read -a domain_elems <<< "${LDAP_DOMAIN}"
 SUFFIX=""
 TOP=""
@@ -105,7 +107,7 @@ userPassword: ${LDAP_READONLY_USER_PASSWORD}
 EOF
 fi
 
-if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+if [ "${LEADER_NODE}" -eq 1 ]; then
     ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/base.ldif
 fi
 
@@ -264,7 +266,7 @@ mv /etc/ldap/schema/fusiondirectory/rfc2307bis.schema \
 fusiondirectory-insert-schema -i /etc/ldap/schema/fusiondirectory/*.schema
 fusiondirectory-insert-schema -m /etc/ldap/schema/fusiondirectory/modify/*.schema
 
-if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+if [ "${LEADER_NODE}" -eq 1 ]; then
     ldapadd -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f /tmp/add.ldif
 fi
 
@@ -321,7 +323,7 @@ done
 #may fail due to replication -> fail; user should configure only one replica with this initial data
 if [ -d /var/ldap-init-data ]; then
     for f in /var/ldap-init-data/*.ldif; do
-        if [ ! -z "${LDAP_INI_GROUP_1}" ]; then
+        if [ "${LEADER_NODE}" -eq 1 ]; then
             ldapadd -c -x -D "cn=admin,${SUFFIX}" -w "${LDAP_ADMIN_PASSWORD}" -f "$f"
         fi
     done
